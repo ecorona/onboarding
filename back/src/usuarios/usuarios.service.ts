@@ -3,7 +3,9 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsuarioEntity } from './entities/usuario.entity.js';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { DeleteResult } from 'typeorm/browser';
+import { PaginationParamsUsuarioDTO } from './dto/pagination-params-usuario.dto.js';
 
 @Injectable()
 export class UsuariosService {
@@ -15,19 +17,42 @@ export class UsuariosService {
     return this.repositorioUsuarios.save(createUsuarioDto);
   }
 
-  findAll() {
-    return `This action returns all usuarios`;
+  async findAll(
+    paginationParams: PaginationParamsUsuarioDTO,
+  ): Promise<Array<UsuarioEntity>> {
+    const qb = this.repositorioUsuarios.createQueryBuilder();
+    qb.skip((paginationParams.page - 1) * paginationParams.pageSize).take(
+      paginationParams.pageSize,
+    );
+    if (paginationParams.orderBy) {
+      qb.orderBy(paginationParams.orderBy, paginationParams.order);
+    }
+    if (paginationParams.search) {
+      qb.where('nombre LIKE :search OR email LIKE :search', {
+        search: `%${paginationParams.search}%`,
+      });
+    }
+    return qb.getMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
+  async findOne(id: number): Promise<UsuarioEntity | null> {
+    return this.repositorioUsuarios.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
+  update(
+    id: number,
+    updateUsuarioDto: UpdateUsuarioDto,
+  ): Promise<UpdateResult> {
+    return this.repositorioUsuarios.update(id, {
+      nombre: updateUsuarioDto.nombre,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+  remove(id: number): Promise<DeleteResult> {
+    return this.repositorioUsuarios.delete(id);
   }
 }

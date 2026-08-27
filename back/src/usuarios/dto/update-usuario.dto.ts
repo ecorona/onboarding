@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUsuarioDto } from './create-usuario.dto.js';
+import { IsNotEmpty } from 'class-validator';
 
-export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
+export class UpdateUsuarioDto {
+  @IsNotEmpty({
+    message: 'El nombre no puede estar vacío',
+  })
+  nombre: string;
+}
