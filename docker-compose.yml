@@ -1,12 +1,9 @@
 services:
   mysql:
     image: mysql:8.0
+    env_file:
+      - ./back/.env
     container_name: mysql_container
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
     ports:
       - "3306:3306"
     volumes:

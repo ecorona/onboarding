@@ -4,6 +4,6 @@ import { ColoniasService } from './colonias.service.js';
 
 @Module({
   controllers: [ColoniasController],
-  providers: [ColoniasService]
+  providers: [ColoniasService],
 })
 export class ColoniasModule {}
