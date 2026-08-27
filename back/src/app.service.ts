@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TituloResponse } from './dtos/titulo-response.dto';
-import { PerfilDTO } from './dtos/perfil.dto';
+import { TituloResponse } from './dtos/titulo-response.dto.js';
+import { PerfilDTO } from './dtos/perfil.dto.js';
 
 @Injectable()
 export class AppService {

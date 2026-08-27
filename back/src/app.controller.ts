@@ -6,9 +6,9 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
-import { AppService } from './app.service';
-import { TituloResponse } from './dtos/titulo-response.dto';
-import { PerfilDTO } from './dtos/perfil.dto';
+import { AppService } from './app.service.js';
+import { TituloResponse } from './dtos/titulo-response.dto.js';
+import { PerfilDTO } from './dtos/perfil.dto.js';
 
 @Controller('app') // ruta: /app
 export class AppController {
