@@ -6,6 +6,7 @@ import { UsuarioEntity } from './entities/usuario.entity.js';
 import { Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
 import { PaginationParamsUsuarioDTO } from './dto/pagination-params-usuario.dto.js';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuariosService {
@@ -14,7 +15,35 @@ export class UsuariosService {
     private readonly repositorioUsuarios: Repository<UsuarioEntity>,
   ) {}
   async create(createUsuarioDto: CreateUsuarioDto): Promise<UsuarioEntity> {
+    //hashear la contraseña del usuario
+    createUsuarioDto.password = await this.hashPassword(
+      createUsuarioDto.password,
+    );
     return this.repositorioUsuarios.save(createUsuarioDto);
+  }
+
+  private async hashPassword(clearPassword: string): Promise<string> {
+    // Implementa aquí la lógica para hashear la contraseña
+    // Por ejemplo, puedes usar bcrypt o cualquier otra librería de hashing
+    const saltOrRounds = 10;
+    const password = clearPassword;
+    const hash = await bcrypt.hash(password, saltOrRounds);
+    return hash; // Esto es solo un ejemplo, no es seguro
+  }
+
+  async passwordValido(
+    usuarioId: number,
+    clearPassword: string,
+  ): Promise<boolean> {
+    const usuario = await this.repositorioUsuarios.findOne({
+      where: {
+        id: usuarioId,
+      },
+    });
+    if (!usuario) {
+      return false;
+    }
+    return await bcrypt.compare(clearPassword, usuario.password);
   }
 
   async findAll(
