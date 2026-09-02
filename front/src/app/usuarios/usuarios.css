@@ -1,0 +1,27 @@
+.modal-backdrop {
+  animation: fade-in 140ms ease-out;
+}
+
+.modal-panel {
+  animation: rise-in 180ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal-panel {
+    animation: none;
+  }
+}
