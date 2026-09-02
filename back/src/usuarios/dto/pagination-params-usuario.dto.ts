@@ -1,12 +1,4 @@
-import {
-  IsIn,
-  IsInt,
-  IsNumberString,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class PaginationParamsUsuarioDTO {
   @IsInt({

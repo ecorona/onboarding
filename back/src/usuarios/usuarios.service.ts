@@ -19,6 +19,7 @@ export class UsuariosService {
     createUsuarioDto.password = await this.hashPassword(
       createUsuarioDto.password,
     );
+    createUsuarioDto.email = createUsuarioDto.email.toLocaleLowerCase();
     return this.repositorioUsuarios.save(createUsuarioDto);
   }
 
@@ -32,18 +33,10 @@ export class UsuariosService {
   }
 
   async passwordValido(
-    usuarioId: number,
+    hashedPassword: string,
     clearPassword: string,
   ): Promise<boolean> {
-    const usuario = await this.repositorioUsuarios.findOne({
-      where: {
-        id: usuarioId,
-      },
-    });
-    if (!usuario) {
-      return false;
-    }
-    return await bcrypt.compare(clearPassword, usuario.password);
+    return await bcrypt.compare(clearPassword, hashedPassword);
   }
 
   async findAll(
@@ -68,6 +61,14 @@ export class UsuariosService {
     return this.repositorioUsuarios.findOne({
       where: {
         id,
+      },
+    });
+  }
+
+  async findByEmail(email: string): Promise<UsuarioEntity | null> {
+    return this.repositorioUsuarios.findOne({
+      where: {
+        email,
       },
     });
   }
