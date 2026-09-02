@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AppService } from '../app-service';
 
 @Component({
@@ -6,6 +6,10 @@ import { AppService } from '../app-service';
   imports: [],
   templateUrl: './home.html',
 })
-export class HomeComponent {
-  appService = inject(AppService);
+export class HomeComponent implements OnInit {
+  readonly appService = inject(AppService);
+
+  ngOnInit(): void {
+    this.appService.obtenerPerfil().subscribe();
+  }
 }

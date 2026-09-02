@@ -1,1 +1,14 @@
-<p>Este es tu perfil {{ appService.perfil()?.nombre }}</p>
+<main class="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+  <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <div class="bg-slate-950 px-8 py-10 text-white">
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-300">Mi cuenta</p>
+      <h1 class="mt-3 text-3xl font-bold">Perfil</h1>
+    </div>
+    <div class="p-8">
+      <p class="text-sm font-medium text-slate-500">Nombre</p>
+      <p class="mt-1 text-xl font-semibold text-slate-950">
+        {{ appService.perfil()?.nombre ?? 'Cargando…' }}
+      </p>
+    </div>
+  </section>
+</main>

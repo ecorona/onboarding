@@ -1,0 +1,132 @@
+<main
+  class="relative flex min-h-[calc(100vh-5.5rem)] items-center justify-center overflow-hidden bg-slate-950 px-4 py-12 sm:px-6"
+>
+  <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+    <div class="absolute -left-28 top-10 size-80 rounded-full bg-fuchsia-500/15 blur-3xl"></div>
+    <div class="absolute -right-28 bottom-0 size-96 rounded-full bg-cyan-400/10 blur-3xl"></div>
+  </div>
+
+  <section
+    class="relative grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.05fr_0.95fr]"
+  >
+    <div class="hidden bg-slate-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+      <div>
+        <span
+          class="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200"
+        >
+          Acceso seguro
+        </span>
+        <h1 class="mt-8 max-w-md text-4xl font-bold leading-tight">
+          Todo lo que necesitas, en un solo lugar.
+        </h1>
+        <p class="mt-4 max-w-md text-base leading-7 text-slate-300">
+          Inicia sesión para consultar tu perfil y continuar donde lo dejaste.
+        </p>
+      </div>
+
+      <div class="mt-12 flex items-center gap-3 text-sm text-slate-400">
+        <span
+          class="flex size-9 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300"
+          aria-hidden="true"
+          >✓</span
+        >
+        Tu sesión se conserva en este dispositivo.
+      </div>
+    </div>
+
+    <div class="p-7 sm:p-10 lg:p-12">
+      <div class="mx-auto max-w-md">
+        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-fuchsia-600">Bienvenido</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Inicia sesión</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Usa el correo y la contraseña registrados en tu cuenta.
+        </p>
+
+        <form class="mt-8 space-y-5" novalidate (submit)="onSubmit($event)">
+          <div>
+            <label for="email" class="mb-2 block text-sm font-semibold text-slate-800">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              autocomplete="email"
+              placeholder="nombre@ejemplo.com"
+              [formField]="loginForm.email"
+              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
+              [class.border-red-500]="loginForm.email().touched() && loginForm.email().invalid()"
+              aria-describedby="email-error"
+            />
+            @if (loginForm.email().touched() && loginForm.email().invalid()) {
+              <div id="email-error" class="mt-2 text-sm text-red-600" role="alert">
+                @for (error of loginForm.email().errors(); track error.kind) {
+                  <p>{{ error.message }}</p>
+                }
+              </div>
+            }
+          </div>
+
+          <div>
+            <label for="password" class="mb-2 block text-sm font-semibold text-slate-800">
+              Contraseña
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="Tu contraseña"
+                [formField]="loginForm.password"
+                class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-4 pr-20 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
+                [class.border-red-500]="
+                  loginForm.password().touched() && loginForm.password().invalid()
+                "
+                aria-describedby="password-error"
+              />
+              <button
+                type="button"
+                class="absolute inset-y-0 right-0 px-4 text-sm font-semibold text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+              </button>
+            </div>
+            @if (loginForm.password().touched() && loginForm.password().invalid()) {
+              <div id="password-error" class="mt-2 text-sm text-red-600" role="alert">
+                @for (error of loginForm.password().errors(); track error.kind) {
+                  <p>{{ error.message }}</p>
+                }
+              </div>
+            }
+          </div>
+
+          @if (errorMessage()) {
+            <div
+              class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              role="alert"
+            >
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <button
+            type="submit"
+            class="flex w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-950/20 transition hover:bg-fuchsia-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span
+                class="mr-2 size-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                aria-hidden="true"
+              ></span>
+              Iniciando sesión…
+            } @else {
+              Iniciar sesión
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>

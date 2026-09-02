@@ -1,19 +1,33 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './auth/auth-guard';
+import { guestGuard } from './auth/guest-guard';
+import { LoginComponent } from './auth/login/login';
 import { HomeComponent } from './home/home';
 import { PerfilComponent } from './perfil/perfil';
 
 export const routes: Routes = [
-  { //redireccionar a una pagina por defecto cuando no se especifica una ruta
+  {
     path: '',
     redirectTo: 'home',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
-    path:'home',
-    component: HomeComponent,
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [guestGuard],
   },
-   {
-    path:'perfil',
+  {
+    path: 'home',
+    component: HomeComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'perfil',
     component: PerfilComponent,
-  }
+    canActivate: [authGuard],
+  },
+  {
+    path: '**',
+    redirectTo: 'home',
+  },
 ];

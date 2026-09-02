@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AppService } from './app-service';
 import { TituloResponse } from './dtos/titulo-response.dto';
 import { DatePipe } from '@angular/common';
+import { AuthService } from './auth/auth';
 
 @Component({
   selector: 'app-root', //<app-root></app-root>
@@ -11,6 +12,8 @@ import { DatePipe } from '@angular/common';
 })
 export class AppComponent implements OnInit {
   readonly appService = inject(AppService);
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   titulo_aplicacion = signal('Mi título inicial');
   fecha_creacion = signal<Date | null>(null);
   ngOnInit() {
@@ -23,6 +26,11 @@ export class AppComponent implements OnInit {
         console.error('error al obtener el titulo', err);
       },
     });
-    this.appService.obtenerPerfil().subscribe();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.appService.limpiarPerfil();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 }
