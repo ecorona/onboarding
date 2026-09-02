@@ -16,7 +16,13 @@ describe('HomeComponent', () => {
         {
           provide: AppService,
           useValue: {
-            perfil: signal({ id: 1, nombre: 'Usuario de prueba' }),
+            perfil: signal({
+              id: 1,
+              nombre: 'Usuario de prueba',
+              email: 'test@example.com',
+              activo: true,
+              emailValidated: true,
+            }),
             obtenerPerfil: () => of(null),
           },
         },

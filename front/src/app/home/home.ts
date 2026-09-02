@@ -10,6 +10,6 @@ export class HomeComponent implements OnInit {
   readonly appService = inject(AppService);
 
   ngOnInit(): void {
-    this.appService.obtenerPerfil().subscribe();
+    this.appService.obtenerPerfil().subscribe({ error: () => undefined });
   }
 }
