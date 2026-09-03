@@ -36,7 +36,38 @@ describe('UsuariosApi', () => {
     );
 
     expect(request.request.method).toBe('GET');
-    request.flush([]);
+    request.flush({ items: [], total: 0 });
+  });
+
+  it('normaliza la respuesta anterior basada en un arreglo', () => {
+    let resultado: { items: unknown[]; total: number } | undefined;
+
+    api
+      .obtenerTodos({
+        page: 1,
+        pageSize: 10,
+        orderBy: 'id',
+        order: 'ASC',
+      })
+      .subscribe((response) => {
+        resultado = response;
+      });
+
+    const request = httpTesting.expectOne(
+      `${API_BASE_URL}/usuarios?page=1&pageSize=10&orderBy=id&order=ASC`,
+    );
+    request.flush([
+      {
+        id: 1,
+        nombre: 'Ana Pérez',
+        email: 'ana@example.com',
+        activo: true,
+        emailValidated: false,
+      },
+    ]);
+
+    expect(resultado?.items).toHaveLength(1);
+    expect(resultado?.total).toBe(1);
   });
 
   it('usa los endpoints del CRUD de usuarios', () => {

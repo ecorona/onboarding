@@ -39,7 +39,6 @@ describe('AppComponent', () => {
 
   it('should render title', async () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Aplicación de prueba');

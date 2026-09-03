@@ -2,10 +2,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   OnInit,
   signal,
+  TemplateRef,
+  viewChild,
 } from '@angular/core';
 import {
   email,
@@ -17,13 +18,22 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
-import { SortOrder, Usuario, UsuarioOrderBy, UsuariosApi, UsuariosQuery } from './usuarios-api';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorIntl, MatPaginatorModule, type PageEvent } from '@angular/material/paginator';
+import { MatSortModule, type Sort } from '@angular/material/sort';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { type Usuario, type UsuarioOrderBy, UsuariosApi, type UsuariosQuery } from './usuarios-api';
 
 interface FiltrosUsuarios {
   search: string;
-  pageSize: string;
-  orderBy: UsuarioOrderBy;
-  order: SortOrder;
 }
 
 interface CrearUsuarioForm {
@@ -38,24 +48,69 @@ interface EditarUsuarioForm {
 
 type ModalUsuario = 'crear' | 'editar' | null;
 
+function crearPaginadorIntl(): MatPaginatorIntl {
+  const intl = new MatPaginatorIntl();
+
+  intl.itemsPerPageLabel = 'Usuarios por página:';
+  intl.firstPageLabel = 'Primera página';
+  intl.previousPageLabel = 'Página anterior';
+  intl.nextPageLabel = 'Página siguiente';
+  intl.lastPageLabel = 'Última página';
+  intl.getRangeLabel = (page, pageSize, length) => {
+    if (length === 0 || pageSize === 0) {
+      return `0 de ${length}`;
+    }
+
+    const inicio = page * pageSize;
+    const fin = Math.min(inicio + pageSize, length);
+    return `${inicio + 1} – ${fin} de ${length}`;
+  };
+
+  return intl;
+}
+
 @Component({
   selector: 'app-usuarios',
-  imports: [FormField],
+  imports: [
+    FormField,
+    MatButtonModule,
+    MatCardModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatPaginatorModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSortModule,
+    MatSnackBarModule,
+    MatTableModule,
+  ],
+  providers: [{ provide: MatPaginatorIntl, useFactory: crearPaginadorIntl }],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Usuarios implements OnInit {
   private readonly usuariosApi = inject(UsuariosApi);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private formDialogRef: MatDialogRef<unknown> | null = null;
+  private deleteDialogRef: MatDialogRef<unknown> | null = null;
+
+  readonly usuarioFormDialog = viewChild.required<TemplateRef<unknown>>('usuarioFormDialog');
+  readonly eliminarUsuarioDialog =
+    viewChild.required<TemplateRef<unknown>>('eliminarUsuarioDialog');
+  readonly displayedColumns = ['id', 'nombre', 'email', 'estado', 'emailValidated', 'acciones'];
 
   readonly usuarios = signal<Usuario[]>([]);
+  readonly totalUsuarios = signal(0);
   readonly pagina = signal(1);
   readonly cargando = signal(false);
   readonly guardando = signal(false);
   readonly eliminando = signal(false);
   readonly errorCarga = signal('');
   readonly errorFormulario = signal('');
-  readonly mensajeExito = signal('');
   readonly modal = signal<ModalUsuario>(null);
   readonly usuarioEditandoId = signal<number | null>(null);
   readonly usuarioAEliminar = signal<Usuario | null>(null);
@@ -63,9 +118,6 @@ export class Usuarios implements OnInit {
 
   readonly filtrosModel = signal<FiltrosUsuarios>({
     search: '',
-    pageSize: '10',
-    orderBy: 'id',
-    order: 'ASC',
   });
   readonly filtrosForm = form(this.filtrosModel);
   readonly filtrosAplicados = signal<Omit<UsuariosQuery, 'page'>>({
@@ -92,10 +144,6 @@ export class Usuarios implements OnInit {
     required(path.nombre, { message: 'Ingresa el nombre del usuario.' });
   });
 
-  readonly hayPaginaSiguiente = computed(
-    () => this.usuarios().length === this.filtrosAplicados().pageSize,
-  );
-
   ngOnInit(): void {
     void this.cargarUsuarios();
   }
@@ -108,10 +156,8 @@ export class Usuarios implements OnInit {
       const search = filtros.search.trim();
 
       this.filtrosAplicados.set({
-        pageSize: Number(filtros.pageSize),
-        orderBy: filtros.orderBy,
-        order: filtros.order,
-        ...(search ? { search } : {}),
+        ...this.filtrosAplicados(),
+        search: search || undefined,
       });
       this.pagina.set(1);
       await this.cargarUsuarios();
@@ -125,21 +171,31 @@ export class Usuarios implements OnInit {
     void this.cargarUsuarios();
   }
 
-  irPaginaAnterior(): void {
-    if (this.pagina() === 1 || this.cargando()) {
+  onOrdenChange(sort: Sort): void {
+    if (this.cargando() || !this.esUsuarioOrderBy(sort.active) || sort.direction === '') {
       return;
     }
 
-    this.pagina.update((pagina) => pagina - 1);
+    const orderBy = sort.active;
+    this.filtrosAplicados.update((filtros) => ({
+      ...filtros,
+      orderBy,
+      order: sort.direction === 'asc' ? 'ASC' : 'DESC',
+    }));
+    this.pagina.set(1);
     void this.cargarUsuarios();
   }
 
-  irPaginaSiguiente(): void {
-    if (!this.hayPaginaSiguiente() || this.cargando()) {
+  onPaginaChange(event: PageEvent): void {
+    if (this.cargando()) {
       return;
     }
 
-    this.pagina.update((pagina) => pagina + 1);
+    this.filtrosAplicados.update((filtros) => ({
+      ...filtros,
+      pageSize: event.pageSize,
+    }));
+    this.pagina.set(event.pageIndex + 1);
     void this.cargarUsuarios();
   }
 
@@ -148,6 +204,7 @@ export class Usuarios implements OnInit {
     this.mostrarPassword.set(false);
     this.crearForm().reset({ nombre: '', email: '', password: '' });
     this.modal.set('crear');
+    this.abrirFormularioDialog();
   }
 
   abrirEditar(usuario: Usuario): void {
@@ -155,6 +212,7 @@ export class Usuarios implements OnInit {
     this.usuarioEditandoId.set(usuario.id);
     this.editarForm().reset({ nombre: usuario.nombre });
     this.modal.set('editar');
+    this.abrirFormularioDialog();
   }
 
   cerrarModal(): void {
@@ -162,9 +220,7 @@ export class Usuarios implements OnInit {
       return;
     }
 
-    this.modal.set(null);
-    this.usuarioEditandoId.set(null);
-    this.errorFormulario.set('');
+    this.formDialogRef?.close();
   }
 
   onCrearSubmit(event: SubmitEvent): void {
@@ -176,10 +232,10 @@ export class Usuarios implements OnInit {
 
       try {
         await firstValueFrom(this.usuariosApi.crear(this.crearModel()));
-        this.modal.set(null);
-        this.mensajeExito.set('Usuario creado correctamente.');
+        this.formDialogRef?.close();
+        this.mostrarExito('Usuario creado correctamente.');
         this.pagina.set(1);
-        await this.cargarUsuarios(true);
+        await this.cargarUsuarios();
       } catch (error: unknown) {
         this.errorFormulario.set(
           this.obtenerMensajeError(error, 'No fue posible crear el usuario.'),
@@ -205,10 +261,9 @@ export class Usuarios implements OnInit {
 
       try {
         await firstValueFrom(this.usuariosApi.actualizar(id, this.editarModel()));
-        this.modal.set(null);
-        this.usuarioEditandoId.set(null);
-        this.mensajeExito.set('Usuario actualizado correctamente.');
-        await this.cargarUsuarios(true);
+        this.formDialogRef?.close();
+        this.mostrarExito('Usuario actualizado correctamente.');
+        await this.cargarUsuarios();
       } catch (error: unknown) {
         this.errorFormulario.set(
           this.obtenerMensajeError(error, 'No fue posible actualizar el usuario.'),
@@ -221,11 +276,21 @@ export class Usuarios implements OnInit {
 
   solicitarEliminar(usuario: Usuario): void {
     this.usuarioAEliminar.set(usuario);
+    this.deleteDialogRef = this.dialog.open(this.eliminarUsuarioDialog(), {
+      autoFocus: false,
+      disableClose: true,
+      maxWidth: '28rem',
+      width: 'calc(100vw - 2rem)',
+    });
+    this.deleteDialogRef.afterClosed().subscribe(() => {
+      this.deleteDialogRef = null;
+      this.usuarioAEliminar.set(null);
+    });
   }
 
   cancelarEliminar(): void {
     if (!this.eliminando()) {
-      this.usuarioAEliminar.set(null);
+      this.deleteDialogRef?.close();
     }
   }
 
@@ -241,11 +306,11 @@ export class Usuarios implements OnInit {
 
     try {
       await firstValueFrom(this.usuariosApi.eliminar(usuario.id));
-      this.usuarioAEliminar.set(null);
-      this.mensajeExito.set('Usuario eliminado correctamente.');
-      await this.cargarUsuarios(true);
+      this.deleteDialogRef?.close();
+      this.mostrarExito('Usuario eliminado correctamente.');
+      await this.cargarUsuarios();
     } catch (error: unknown) {
-      this.usuarioAEliminar.set(null);
+      this.deleteDialogRef?.close();
       this.errorCarga.set(this.obtenerMensajeError(error, 'No fue posible eliminar el usuario.'));
     } finally {
       this.eliminando.set(false);
@@ -256,40 +321,60 @@ export class Usuarios implements OnInit {
     this.mostrarPassword.update((mostrar) => !mostrar);
   }
 
-  cerrarMensajeExito(): void {
-    this.mensajeExito.set('');
-  }
-
   reintentar(): void {
     void this.cargarUsuarios();
   }
 
-  private async cargarUsuarios(conservarMensaje = false): Promise<void> {
+  private abrirFormularioDialog(): void {
+    this.formDialogRef = this.dialog.open(this.usuarioFormDialog(), {
+      autoFocus: 'first-tabbable',
+      maxWidth: '32rem',
+      restoreFocus: true,
+      width: 'calc(100vw - 2rem)',
+    });
+    this.formDialogRef.afterClosed().subscribe(() => {
+      this.formDialogRef = null;
+      this.modal.set(null);
+      this.usuarioEditandoId.set(null);
+      this.errorFormulario.set('');
+    });
+  }
+
+  private mostrarExito(mensaje: string): void {
+    this.snackBar.open(mensaje, 'Cerrar', { duration: 4500 });
+  }
+
+  private async cargarUsuarios(): Promise<void> {
     this.cargando.set(true);
     this.errorCarga.set('');
 
-    if (!conservarMensaje) {
-      this.mensajeExito.set('');
-    }
-
     try {
-      let usuarios = await firstValueFrom(
+      let respuesta = await firstValueFrom(
         this.usuariosApi.obtenerTodos({ page: this.pagina(), ...this.filtrosAplicados() }),
       );
+      const ultimaPagina = Math.max(
+        1,
+        Math.ceil(respuesta.total / this.filtrosAplicados().pageSize),
+      );
 
-      if (usuarios.length === 0 && this.pagina() > 1) {
-        this.pagina.update((pagina) => pagina - 1);
-        usuarios = await firstValueFrom(
+      if (this.pagina() > ultimaPagina) {
+        this.pagina.set(ultimaPagina);
+        respuesta = await firstValueFrom(
           this.usuariosApi.obtenerTodos({ page: this.pagina(), ...this.filtrosAplicados() }),
         );
       }
 
-      this.usuarios.set(usuarios);
+      this.usuarios.set(respuesta.items);
+      this.totalUsuarios.set(respuesta.total);
     } catch (error: unknown) {
       this.errorCarga.set(this.obtenerMensajeError(error, 'No fue posible cargar los usuarios.'));
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  private esUsuarioOrderBy(value: string): value is UsuarioOrderBy {
+    return value === 'id' || value === 'nombre' || value === 'email';
   }
 
   private obtenerMensajeError(error: unknown, mensajePredeterminado: string): string {

@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+.app-toolbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  min-height: 5rem;
+  height: auto;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.75rem max(1rem, calc((100vw - 72rem) / 2));
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level1);
+}
+
+.brand-block {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.brand-title {
+  overflow: hidden;
+  font: var(--mat-sys-title-large);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-date {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-content {
+  display: block;
+  min-height: calc(100vh - 5rem);
+}
+
+@media (max-width: 640px) {
+  .app-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .toolbar-actions {
+    justify-content: space-between;
+  }
+
+  .toolbar-actions nav {
+    min-width: 0;
+    flex: 1;
+  }
+}

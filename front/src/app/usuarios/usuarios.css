@@ -1,27 +1,164 @@
-.modal-backdrop {
-  animation: fade-in 140ms ease-out;
+:host {
+  display: block;
 }
 
-.modal-panel {
-  animation: rise-in 180ms ease-out;
+.users-card {
+  padding: 0;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
+.filters {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.filter-actions,
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-actions button {
+  min-height: 3.5rem;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--mat-sys-error-container);
+  border-radius: 0.75rem;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.table-region {
+  position: relative;
+  min-height: 14rem;
+}
+
+.table-region mat-progress-bar {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 46rem;
+}
+
+.id-cell {
+  color: var(--mat-sys-on-surface-variant);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-email {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.actions-header {
+  text-align: right;
+}
+
+.row-actions {
+  justify-content: flex-end;
+}
+
+.danger-button,
+.danger-flat-button {
+  --mat-button-text-label-text-color: var(--mat-sys-error);
+}
+
+.danger-flat-button {
+  --mat-button-filled-container-color: var(--mat-sys-error);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+}
+
+.empty-state {
+  padding: 3.5rem 1rem;
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.empty-state span {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+}
+
+mat-paginator {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+mat-dialog-content mat-form-field {
+  width: 100%;
+}
+
+.dialog-eyebrow {
+  order: -1;
+  margin: 0 0 0.75rem;
+  color: var(--mat-sys-primary);
+  font: var(--mat-sys-label-medium);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dialog-error {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+mat-dialog-actions mat-spinner {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+@media (min-width: 40rem) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
   }
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem) scale(0.985);
+@media (min-width: 64rem) {
+  .filters {
+    grid-template-columns: minmax(16rem, 1fr) auto;
+    align-items: center;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .modal-backdrop,
-  .modal-panel {
-    animation: none;
+  .filter-actions {
+    grid-column: auto;
   }
 }

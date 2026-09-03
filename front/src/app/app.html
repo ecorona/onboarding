@@ -1,46 +1,47 @@
-<div class="flex min-h-screen flex-col bg-slate-50">
-  <header class="border-b border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-6">
-    <div
-      class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
-    >
-      <div>
-        <p class="text-lg font-bold text-slate-950 sm:text-xl">{{ titulo_aplicacion() }}</p>
-        <p class="text-xs text-slate-500">{{ fecha_creacion() | date: 'long' }}</p>
+<div class="app-shell">
+  <header>
+    <mat-toolbar class="app-toolbar">
+      <div class="brand-block">
+        <span class="brand-title">{{ titulo_aplicacion() }}</span>
+        <span class="brand-date">{{ fecha_creacion() | date: 'long' }}</span>
       </div>
 
       @if (authService.isAuthenticated()) {
-        <nav
-          class="flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:gap-2"
-          aria-label="Navegación principal"
-        >
-          <a
-            routerLink="/home"
-            class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-            >Inicio</a
-          >
-          <a
-            routerLink="/perfil"
-            class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-            >Perfil</a
-          >
-          <a
-            routerLink="/usuarios"
-            class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-            >Usuarios</a
-          >
-          <button
-            type="button"
-            class="rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-fuchsia-700"
-            (click)="logout()"
-          >
-            Salir
+        <div class="toolbar-actions">
+          <nav mat-tab-nav-bar [tabPanel]="mainPanel" aria-label="Navegación principal">
+            <a
+              mat-tab-link
+              routerLink="/home"
+              routerLinkActive
+              #homeActive="routerLinkActive"
+              [active]="homeActive.isActive"
+            >
+              Inicio
+            </a>
+            <a
+              mat-tab-link
+              routerLink="/usuarios"
+              routerLinkActive
+              #usersActive="routerLinkActive"
+              [active]="usersActive.isActive"
+            >
+              Usuarios
+            </a>
+          </nav>
+
+          <button mat-stroked-button type="button" [matMenuTriggerFor]="accountMenu">
+            Mi cuenta
           </button>
-        </nav>
+          <mat-menu #accountMenu="matMenu">
+            <a mat-menu-item routerLink="/perfil">Ver perfil</a>
+            <button mat-menu-item type="button" (click)="logout()">Cerrar sesión</button>
+          </mat-menu>
+        </div>
       }
-    </div>
+    </mat-toolbar>
   </header>
 
-  <div class="flex-1">
+  <mat-tab-nav-panel #mainPanel class="app-content">
     <router-outlet />
-  </div>
+  </mat-tab-nav-panel>
 </div>

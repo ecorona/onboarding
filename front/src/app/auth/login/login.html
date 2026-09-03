@@ -6,9 +6,7 @@
     <div class="absolute -right-28 bottom-0 size-96 rounded-full bg-cyan-400/10 blur-3xl"></div>
   </div>
 
-  <section
-    class="relative grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl shadow-black/40 lg:grid-cols-[1.05fr_0.95fr]"
-  >
+  <mat-card class="login-card relative w-full max-w-5xl overflow-hidden shadow-2xl">
     <div class="hidden bg-slate-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
       <div>
         <span
@@ -34,7 +32,7 @@
       </div>
     </div>
 
-    <div class="p-7 sm:p-10 lg:p-12">
+    <mat-card-content class="login-form-panel p-7 sm:p-10 lg:p-12">
       <div class="mx-auto max-w-md">
         <p class="text-sm font-semibold uppercase tracking-[0.16em] text-fuchsia-600">Bienvenido</p>
         <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Inicia sesión</h2>
@@ -43,63 +41,54 @@
         </p>
 
         <form class="mt-8 space-y-5" novalidate (submit)="onSubmit($event)">
-          <div>
-            <label for="email" class="mb-2 block text-sm font-semibold text-slate-800">
-              Correo electrónico
-            </label>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Correo electrónico</mat-label>
             <input
+              matInput
               id="email"
               type="email"
               autocomplete="email"
               placeholder="nombre@ejemplo.com"
               [formField]="loginForm.email"
-              class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
-              [class.border-red-500]="loginForm.email().touched() && loginForm.email().invalid()"
               aria-describedby="email-error"
             />
             @if (loginForm.email().touched() && loginForm.email().invalid()) {
-              <div id="email-error" class="mt-2 text-sm text-red-600" role="alert">
+              <mat-error id="email-error" role="alert">
                 @for (error of loginForm.email().errors(); track error.kind) {
-                  <p>{{ error.message }}</p>
+                  {{ error.message }}
                 }
-              </div>
+              </mat-error>
             }
-          </div>
+          </mat-form-field>
 
-          <div>
-            <label for="password" class="mb-2 block text-sm font-semibold text-slate-800">
-              Contraseña
-            </label>
-            <div class="relative">
-              <input
-                id="password"
-                [type]="showPassword() ? 'text' : 'password'"
-                autocomplete="current-password"
-                placeholder="Tu contraseña"
-                [formField]="loginForm.password"
-                class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-4 pr-20 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
-                [class.border-red-500]="
-                  loginForm.password().touched() && loginForm.password().invalid()
-                "
-                aria-describedby="password-error"
-              />
-              <button
-                type="button"
-                class="absolute inset-y-0 right-0 px-4 text-sm font-semibold text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600"
-                (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              >
-                {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
-              </button>
-            </div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Contraseña</mat-label>
+            <input
+              matInput
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Tu contraseña"
+              [formField]="loginForm.password"
+              aria-describedby="password-error"
+            />
+            <button
+              mat-button
+              matSuffix
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
+            </button>
             @if (loginForm.password().touched() && loginForm.password().invalid()) {
-              <div id="password-error" class="mt-2 text-sm text-red-600" role="alert">
+              <mat-error id="password-error" role="alert">
                 @for (error of loginForm.password().errors(); track error.kind) {
-                  <p>{{ error.message }}</p>
+                  {{ error.message }}
                 }
-              </div>
+              </mat-error>
             }
-          </div>
+          </mat-form-field>
 
           @if (errorMessage()) {
             <div
@@ -111,15 +100,13 @@
           }
 
           <button
+            mat-flat-button
             type="submit"
-            class="flex w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-950/20 transition hover:bg-fuchsia-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-600 disabled:cursor-not-allowed disabled:opacity-60"
+            class="login-submit w-full"
             [disabled]="isSubmitting()"
           >
             @if (isSubmitting()) {
-              <span
-                class="mr-2 size-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-                aria-hidden="true"
-              ></span>
+              <mat-spinner diameter="18" aria-label="Iniciando sesión" />
               Iniciando sesión…
             } @else {
               Iniciar sesión
@@ -127,6 +114,6 @@
           </button>
         </form>
       </div>
-    </div>
-  </section>
+    </mat-card-content>
+  </mat-card>
 </main>

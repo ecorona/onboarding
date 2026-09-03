@@ -1,16 +1,14 @@
 <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-  <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-    <div class="bg-slate-950 px-8 py-10 text-white">
-      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-300">Mi cuenta</p>
-      <h1 class="mt-3 text-3xl font-bold">Perfil</h1>
-    </div>
-    <div class="p-8">
+  <mat-card appearance="outlined" class="overflow-hidden rounded-3xl">
+    <mat-card-header class="bg-slate-950 px-8 py-8 text-white">
+      <mat-card-subtitle class="text-cyan-300!">Mi cuenta</mat-card-subtitle>
+      <mat-card-title class="mt-2 text-3xl!">Perfil</mat-card-title>
+    </mat-card-header>
+    <mat-divider />
+    <mat-card-content class="p-8!">
       @if (appService.cargandoPerfil()) {
         <div class="flex items-center gap-3 text-slate-500" role="status">
-          <span
-            class="size-5 animate-spin rounded-full border-2 border-slate-200 border-t-fuchsia-600"
-            aria-hidden="true"
-          ></span>
+          <mat-spinner diameter="24" aria-label="Cargando perfil" />
           Cargando información…
         </div>
       } @else if (appService.errorPerfil()) {
@@ -33,15 +31,11 @@
           <div>
             <dt class="text-sm font-medium text-slate-500">Estado de la cuenta</dt>
             <dd class="mt-2">
-              <span
-                class="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
-                [class.bg-emerald-100]="perfil.activo"
-                [class.text-emerald-700]="perfil.activo"
-                [class.bg-red-100]="!perfil.activo"
-                [class.text-red-700]="!perfil.activo"
-              >
-                {{ perfil.activo ? 'Activa' : 'Inactiva' }}
-              </span>
+              <mat-chip-set aria-label="Estado de la cuenta">
+                <mat-chip [highlighted]="perfil.activo">
+                  {{ perfil.activo ? 'Activa' : 'Inactiva' }}
+                </mat-chip>
+              </mat-chip-set>
             </dd>
           </div>
           <div>
@@ -52,6 +46,6 @@
           </div>
         </dl>
       }
-    </div>
-  </section>
+    </mat-card-content>
+  </mat-card>
 </main>

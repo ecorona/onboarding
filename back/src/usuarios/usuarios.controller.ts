@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
   Query,
 } from '@nestjs/common';
-import { UsuariosService } from './usuarios.service.js';
+import { UsuariosService, type UsuariosPage } from './usuarios.service.js';
 import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
 import { UsuarioEntity } from './entities/usuario.entity.js';
@@ -28,7 +28,7 @@ export class UsuariosController {
   @Get()
   findAll(
     @Query() paginationParams: PaginationParamsUsuarioDTO,
-  ): Promise<Array<UsuarioEntity>> {
+  ): Promise<UsuariosPage> {
     return this.usuariosService.findAll(paginationParams);
   }
 

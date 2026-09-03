@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { API_BASE_URL } from '../api.config';
 
 export type UsuarioOrderBy = 'id' | 'nombre' | 'email';
@@ -32,6 +32,11 @@ export interface UsuariosQuery {
   search?: string;
 }
 
+export interface UsuariosPage {
+  items: Usuario[];
+  total: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,7 +44,7 @@ export class UsuariosApi {
   private readonly http = inject(HttpClient);
   private readonly endpoint = `${API_BASE_URL}/usuarios`;
 
-  obtenerTodos(query: UsuariosQuery): Observable<Usuario[]> {
+  obtenerTodos(query: UsuariosQuery): Observable<UsuariosPage> {
     let params = new HttpParams()
       .set('page', query.page)
       .set('pageSize', query.pageSize)
@@ -50,7 +55,21 @@ export class UsuariosApi {
       params = params.set('search', query.search);
     }
 
-    return this.http.get<Usuario[]>(this.endpoint, { params });
+    return this.http.get<UsuariosPage | Usuario[]>(this.endpoint, { params }).pipe(
+      map((response) => {
+        if (!Array.isArray(response)) {
+          return response;
+        }
+
+        const itemsBeforeCurrentPage = (query.page - 1) * query.pageSize;
+        const hasNextPage = response.length === query.pageSize;
+
+        return {
+          items: response,
+          total: itemsBeforeCurrentPage + response.length + (hasNextPage ? 1 : 0),
+        };
+      }),
+    );
   }
 
   crear(usuario: CrearUsuarioRequest): Observable<Usuario> {
